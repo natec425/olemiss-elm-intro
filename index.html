@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Intro to Elm</title>
+  <meta charset="utf-8">
+  <style>
+    @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+    @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+    @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+    body {
+      font-family: 'Droid Serif';
+    }
+    
+    h1,
+    h2,
+    h3 {
+      font-family: 'Yanone Kaffeesatz';
+      font-weight: normal;
+    }
+    
+    .remark-code,
+    .remark-inline-code {
+      font-family: 'Ubuntu Mono';
+    }
+  </style>
+</head>
+
+<body>
+  <textarea id="source">
+
+class: center, middle
+
+# Introduction to Elm
+Nate Clark
+
+---
+
+# Personal confessions
+
+- I'm not a front-end dev
+- I hate the browser
+- Elm lets me keep my sanity
+
+---
+
+# Goals for today
+
+- Learn the basics of the __Elm Architecture__
+- Write a __simple program__ in Elm
+- Learn basic __language features__ of Elm
+- Highlight important __design decisions__ of Elm
+
+*Follow along with slides at [natec425.github.io/olemiss-elm-intro](natec425.github.io/olemiss-elm-intro)*
+
+---
+
+# The Elm Architecture
+
+Almost every (Elm) application has at least three pieces:
+- state
+- ways to change the state
+- ways to view the state
+
+In Elm, you define your application exactly in terms of these ideas.
+
+Elm has names for each of these pieces:
+- state
+  - `Model` is the type of your application's state
+- ways to change the state
+  - `Msg` is the ways your application's state can change
+  - `update : Msg -> Model -> Model`
+- ways to view the state
+  - `view : Model -> Html Msg`
+
+---
+
+# Describing a counter widget
+
+Our counter widget should allow us to +1 or -1 a number that we are keeping up with.
+
+It might look something like:
+
+<button>-</button>5<button>+</button>
+
+### Questions:
+
+1. What is the state of our application?
+1. What are the ways we can change the state of our application?
+
+---
+
+# Questions:
+
+1. What is the state of our application?
+  - Int
+1. What are the ways we can change the state of our application?
+  - add 1
+  - subtract 1
+
+### What does this look like in Elm?
+
+```elm
+-- The type of my application's state is an integer
+type alias Model = Int
+
+-- My state can by changed by adding 1 or subtracting 1
+type Msg
+  = Add1
+  | Sub1
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    Add1 -> model + 1
+    Sub1 -> model - 1
+```
+
+---
+
+# What is special about this code?
+
+```elm
+type alias Model = Int
+
+-- Algebraic Data Type
+type Msg
+  = Add1
+  | Sub1
+
+update : Msg -> Model -> Model
+update msg model =
+  -- Pattern Matching
+  case msg of
+    Add1 -> model + 1
+    Sub1 -> model - 1
+```
+
+## Important Design Decision!
+
+>> <center><em>The state of my application is completely seperate from the presentation of that state.</em></center>
+
+---
+
+# Progess so far:
+- [X] `Model`
+- [X] `Msg`
+- [X] `update`
+- [ ] `view`
+
+>>Any Questions?
+
+---
+
+# Writing the view
+
+```elm
+import Html exposing (Html, div, button)
+import Html.Events exposing (onClick)
+
+view : Model -> Html Msg
+view model =
+  div []
+      [ button [ onClick Sub1 ] [ text "-" ]
+      , text (toString model)
+      , button [ onClick Add1 ] [ text "+ "]
+      ]
+```
+
+---
+
+# What is special about this code?
+```elm
+import Html exposing (Html, div, button, text)
+import Html.Events exposing (onClick)
+
+-- Html Msg represents some Html that is capable of producing a Msg
+view : Model -> Html Msg
+view model =
+  div []
+      [ button [ onClick Sub1 ] [ text "-" ]
+      , text (toString model)
+      , button [ onClick Add1 ] [ text "+ "]
+      ]
+
+-- Html elements are essentially collections of attributes and children
+-- Html Msg ~= Node [Attribute Msg] [Html Msg]
+```
+
+## Important Design Decisions!
+
+>> 1. <em>The view is a pure function of the state of the application.</em>
+>> 2. <em>The view is data! Like the stuff we work with every day!</em>
+
+---
+
+# Wiring it all up
+
+```elm
+import Html.App exposing (beginnerProgram)
+
+main = beginnerProgram
+                    { -- the initial state is 0
+                      model = 0
+                    , -- the update function is how you update the state
+                      update = update
+                    , -- the view function is how you show the state
+                      view = view
+                    }
+```
+
+# Important Design Decision!
+
+>> <center><em>Your program is a collection of data; not a series of statements</em></center>
+
+---
+
+# In all its glory
+
+```elm
+import Html exposing (Html, div, button, text)
+import Html.Events exposing (onClick)
+import Html.App exposing (beginnerProgram)
+
+main = beginnerProgram
+            { model = 0 , update = update, view = view }
+
+type alias Model = Int
+
+type Msg = Add1 | Sub1
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    Add1 -> model + 1
+    Sub1 -> model - 1
+
+view : Model -> Html Msg
+view model =
+  div []
+      [ button [ onClick Sub1 ] [ text "-" ]
+      , text (toString model)
+      , button [ onClick Add1 ] [ text "+ "]
+      ]
+```
+
+---
+
+# Unanswered questions:
+
+- How2 build something bigger?
+- How2 AJAX?
+- How2 CSS?
+- How2 Test?
+
+# Answer for now:
+
+- [Read the guide!](https://guide.elm-lang.org/architecture/)
+- [Join the community!](http://elm-lang.org/community)
+
+
+
+
+</textarea>
+  <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+  <script>
+      var slideshow = remark.create();
+    </script>
+</body>
+
+</html>
